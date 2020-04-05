@@ -52,7 +52,7 @@
 	 *
 	 * @example
 	 * view.show({
-	 *	id: 1,
+	 *	id: "1",
 	 *	title: "Hello World",
 	 *	completed: 0,
 	 * });

@@ -11,7 +11,7 @@
 	 * real life you probably would be making AJAX calls
 	 */
 	function Store(name, callback) {
-		callback = callback || function () {};
+		callback = callback || function () { };
 
 		this._dbName = name;
 
@@ -62,7 +62,7 @@
 	 * @param {function} callback The callback to fire upon retrieving data
 	 */
 	Store.prototype.findAll = function (callback) {
-		callback = callback || function () {};
+		callback = callback || function () { };
 		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
 	};
 
@@ -72,20 +72,22 @@
 	 *
 	 * @param {object} updateData The data to save back into the DB
 	 * @param {function} callback The callback to fire after saving
-	 * @param {number} id An optional param to enter an ID of an item to update
+	 * @param {string} id An optional param to enter an ID of an item to update
 	 */
 	Store.prototype.save = function (updateData, callback, id) {
 		var data = JSON.parse(localStorage[this._dbName]);
 		var todos = data.todos;
 
-		callback = callback || function () {};
+		callback = callback || function () { };
 
-		// Generate an ID
-	    var newId = ""; 
-	    var charset = "0123456789";
-
-        for (var i = 0; i < 6; i++) {
-     		newId += charset.charAt(Math.floor(Math.random() * charset.length));
+		// Generate an UUID based on time stamp
+		var createUUID = function() {
+			var date = new Date().getTime();
+			var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (element) {
+				var random = (date + Math.random() * 16) % 16 | 0;
+				return (element == 'x' ? random : (random & 0x3 | 0x8)).toString(16);
+			});
+			return uuid;
 		}
 
 		// If an ID was actually given, find the item and update each property
@@ -102,10 +104,9 @@
 			localStorage[this._dbName] = JSON.stringify(data);
 			callback.call(this, todos);
 		} else {
-
-    		// Assign an ID
-			updateData.id = parseInt(newId);
-    
+			// Assign an ID
+			var newId = createUUID();
+			updateData.id = newId;
 
 			todos.push(updateData);
 			localStorage[this._dbName] = JSON.stringify(data);
@@ -116,26 +117,18 @@
 	/**
 	 * Will remove an item from the Store based on its ID
 	 *
-	 * @param {number} id The ID of the item you want to remove
+	 * @param {string} id The ID of the item you want to remove
 	 * @param {function} callback The callback to fire after saving
 	 */
 	Store.prototype.remove = function (id, callback) {
 		var data = JSON.parse(localStorage[this._dbName]);
 		var todos = data.todos;
-		var todoId;
-		
-		for (var i = 0; i < todos.length; i++) {
-			if (todos[i].id == id) {
-				todoId = todos[i].id;
-			}
-		}
 
 		for (var i = 0; i < todos.length; i++) {
-			if (todos[i].id == todoId) {
+			if (todos[i].id === id) {
 				todos.splice(i, 1);
 			}
 		}
-
 		localStorage[this._dbName] = JSON.stringify(data);
 		callback.call(this, todos);
 	};
@@ -146,7 +139,7 @@
 	 * @param {function} callback The callback to fire after dropping the data
 	 */
 	Store.prototype.drop = function (callback) {
-		var data = {todos: []};
+		var data = { todos: [] };
 		localStorage[this._dbName] = JSON.stringify(data);
 		callback.call(this, data.todos);
 	};
